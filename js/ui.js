@@ -7,7 +7,7 @@
  * @param {Function} onDelete - Callback ketika tombol Hapus diklik.
  * @param {Function} onNote - Callback ketika tombol Catatan diklik.
  */
-export function renderNovels(novels, onEdit, onDelete, onNote) {
+export function renderNovels(novels, onEdit, onDelete, onNote, onUpdate) {
   const novelList = document.getElementById('novelList');
   novelList.innerHTML = '';
 
@@ -43,6 +43,12 @@ export function renderNovels(novels, onEdit, onDelete, onNote) {
     noteButton.textContent = 'Catatan';
     // Mengirimkan novel.id alih-alih index
     noteButton.addEventListener('click', () => onNote(novel.id));
+
+    const updateButton = document.createElement('button');
+updateButton.className = 'update-btn';
+updateButton.textContent = 'Update Otomatis';
+updateButton.addEventListener('click', () => onUpdate(novel.id));
+actionsDiv.appendChild(updateButton);
 
     actionsDiv.appendChild(editButton);
     actionsDiv.appendChild(deleteButton);

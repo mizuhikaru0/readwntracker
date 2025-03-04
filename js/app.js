@@ -26,7 +26,7 @@ async function loadAndRenderNovels() {
   const searchInput = document.getElementById('searchInput');
   const query = searchInput ? searchInput.value : '';
   const filteredNovels = query ? filterNovels(query, novels) : novels;
-  renderNovels(filteredNovels, editNovel, deleteNovel, addNote);
+  renderNovels(filteredNovels, editNovel, deleteNovel, addNote, updateNovelFromUrl);
   
   // Hitung dan render statistik bacaan
   const totalNovel = novels.length;
@@ -102,6 +102,37 @@ async function addNote(id) {
     await loadAndRenderNovels();
   }
 }
+
+async function updateNovelFromUrl(id) {
+  const novels = await getNovels();
+  const novel = novels.find(n => n.id === id);
+  if (!novel) {
+    alert('Novel tidak ditemukan.');
+    return;
+  }
+  try {
+    const response = await fetch(novel.url);
+    const html = await response.text();
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+    // Contoh: ambil elemen dengan kelas "latest-chapter" untuk mendapatkan bab terbaru
+    const chapterElement = doc.querySelector('.latest-chapter');
+    if (chapterElement) {
+      const newChapter = chapterElement.textContent.trim();
+      novel.chapter = newChapter;
+      await updateNovel(novel);
+      alert('Novel berhasil diperbarui!');
+      await updateCache();
+      await loadAndRenderNovels();
+    } else {
+      alert('Bab terbaru tidak ditemukan pada halaman novel.');
+    }
+  } catch (error) {
+    console.error(error);
+    alert('Terjadi kesalahan saat memperbarui novel.');
+  }
+}
+
 
 function toggleTheme() {
   currentTheme = currentTheme === 'light' ? 'dark' : 'light';
