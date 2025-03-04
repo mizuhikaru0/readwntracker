@@ -6,25 +6,32 @@ import { filterNovels } from './search.js';
 
 let currentTheme = 'light';
 
-async function calculateStats() {
+// Fungsi untuk memperbarui cache localStorage dengan data dari IndexedDB
+async function updateCache() {
   const novels = await getNovels();
-  const totalNovel = novels.length;
-  const totalChapters = novels.reduce((sum, novel) => sum + (parseInt(novel.chapter, 10) || 0), 0);
-  return { totalNovel, totalChapters };
+  localStorage.setItem("novelsCache", JSON.stringify(novels));
 }
 
-async function updateRender() {
-  let novels = await getNovels();
+async function loadAndRenderNovels() {
+  let novels = [];
+  // Cek apakah ada cache di localStorage
+  const cachedNovels = localStorage.getItem("novelsCache");
+  if (cachedNovels) {
+    novels = JSON.parse(cachedNovels);
+  } else {
+    novels = await getNovels();
+    localStorage.setItem("novelsCache", JSON.stringify(novels));
+  }
+  
   const searchInput = document.getElementById('searchInput');
   const query = searchInput ? searchInput.value : '';
   const filteredNovels = query ? filterNovels(query, novels) : novels;
   renderNovels(filteredNovels, editNovel, deleteNovel, addNote);
-  const stats = await calculateStats();
-  renderStats(stats);
-}
-
-async function loadAndRenderNovels() {
-  await updateRender();
+  
+  // Hitung dan render statistik bacaan
+  const totalNovel = novels.length;
+  const totalChapters = novels.reduce((sum, novel) => sum + (parseInt(novel.chapter, 10) || 0), 0);
+  renderStats({ totalNovel, totalChapters });
 }
 
 document.getElementById('novelForm').addEventListener('submit', async function(e) {
@@ -33,7 +40,7 @@ document.getElementById('novelForm').addEventListener('submit', async function(e
   const chapter = document.getElementById('chapter').value;
   const url = document.getElementById('url').value;
   
-  // Tambah novel baru; id akan dihasilkan otomatis oleh IndexedDB
+  // Tambahkan novel baru ke IndexedDB
   await addNovel({ title, chapter, url, notes: '' });
   
   // Bersihkan form input
@@ -41,6 +48,8 @@ document.getElementById('novelForm').addEventListener('submit', async function(e
   document.getElementById('chapter').value = '';
   document.getElementById('url').value = '';
   
+  // Perbarui cache setelah penambahan novel dan render ulang
+  await updateCache();
   await loadAndRenderNovels();
 });
 
@@ -49,7 +58,6 @@ document.getElementById('searchInput').addEventListener('input', async function(
 });
 
 async function editNovel(id) {
-  // Pastikan id adalah number
   const idNum = Number(id);
   let novels = await getNovels();
   const novel = novels.find(n => n.id === idNum);
@@ -61,6 +69,8 @@ async function editNovel(id) {
   if (newChapter !== null) {
     novel.chapter = newChapter;
     await updateNovel(novel);
+    // Perbarui cache setelah edit dan render ulang
+    await updateCache();
     await loadAndRenderNovels();
   }
 }
@@ -69,6 +79,8 @@ async function deleteNovel(id) {
   const idNum = Number(id);
   if (confirm("Apakah Anda yakin ingin menghapus novel ini?")) {
     await deleteNovelFromDB(idNum);
+    // Perbarui cache setelah penghapusan dan render ulang
+    await updateCache();
     await loadAndRenderNovels();
   }
 }
@@ -85,6 +97,8 @@ async function addNote(id) {
   if (note !== null) {
     novel.notes = note;
     await updateNovel(novel);
+    // Perbarui cache setelah menambahkan catatan dan render ulang
+    await updateCache();
     await loadAndRenderNovels();
   }
 }
