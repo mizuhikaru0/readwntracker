@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pelacak Bacaan Web Novel</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="manifest" href="manifest.json">
+</head>
+<body>
+  <!-- Container untuk tombol toggle tema akan disisipkan otomatis -->
+  <div class="container">
+    <h1>Pelacak Bacaan Web Novel</h1>
+    
+    <!-- Input pencarian -->
+    <input type="text" id="searchInput" placeholder="Cari novel...">
+    
+    <!-- Form tambah novel -->
+    <form id="novelForm">
+      <input type="text" id="title" placeholder="Judul Novel" required>
+      <input type="text" id="chapter" placeholder="Bab Terakhir" required>
+      <input type="url" id="url" placeholder="URL Novel" required>
+      <button type="submit">Tambahkan Novel</button>
+    </form>
+    
+    <!-- Tempat daftar novel -->
+    <ul class="novel-list" id="novelList"></ul>
+    
+    <!-- Tempat menampilkan statistik bacaan -->
+    <div id="stats"></div>
+  </div>
+  
+  <!-- Registrasi Service Worker untuk PWA -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function() {
+        navigator.serviceWorker.register('sw.js').then(function(registration) {
+          console.log('ServiceWorker registered with scope:', registration.scope);
+        }, function(err) {
+          console.log('ServiceWorker registration failed:', err);
+        });
+      });
+    }
+  </script>
+  
+  <!-- Memuat modul aplikasi utama -->
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
