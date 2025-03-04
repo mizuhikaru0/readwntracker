@@ -11,7 +11,7 @@ export function renderNovels(novels, onEdit, onDelete, onNote) {
   const novelList = document.getElementById('novelList');
   novelList.innerHTML = '';
 
-  novels.forEach((novel, index) => {
+  novels.forEach((novel) => {
     const li = document.createElement('li');
     li.className = 'novel-item';
 
@@ -29,17 +29,20 @@ export function renderNovels(novels, onEdit, onDelete, onNote) {
     const editButton = document.createElement('button');
     editButton.className = 'edit-btn';
     editButton.textContent = 'Edit';
-    editButton.addEventListener('click', () => onEdit(index));
+    // Mengirimkan novel.id alih-alih index
+    editButton.addEventListener('click', () => onEdit(novel.id));
 
     const deleteButton = document.createElement('button');
     deleteButton.className = 'delete-btn';
     deleteButton.textContent = 'Hapus';
-    deleteButton.addEventListener('click', () => onDelete(index));
+    // Mengirimkan novel.id alih-alih index
+    deleteButton.addEventListener('click', () => onDelete(novel.id));
 
     const noteButton = document.createElement('button');
     noteButton.className = 'note-btn';
     noteButton.textContent = 'Catatan';
-    noteButton.addEventListener('click', () => onNote(index));
+    // Mengirimkan novel.id alih-alih index
+    noteButton.addEventListener('click', () => onNote(novel.id));
 
     actionsDiv.appendChild(editButton);
     actionsDiv.appendChild(deleteButton);
@@ -58,7 +61,7 @@ export function renderNovels(novels, onEdit, onDelete, onNote) {
 export function renderStats(stats) {
   const statsDiv = document.getElementById('stats');
   if (!statsDiv) {
-    console.warn('Element with id "stats" not found.');
+    console.warn('Element with id "stats" tidak ditemukan.');
     return;
   }
   statsDiv.innerHTML = `
